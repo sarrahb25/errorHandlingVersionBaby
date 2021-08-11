@@ -1,0 +1,27 @@
+{
+  "name": "errorhandling",
+  "version": "1.0.0",
+  "description": "A node.js RESTFUL API project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sarrahb25/errorHandlingVersionBaby.git"
+  },
+  "keywords": [
+    "node",
+    "restful",
+    "api"
+  ],
+  "author": "Sarra Hattab",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sarrahb25/errorHandlingVersionBaby/issues"
+  },
+  "homepage": "https://github.com/sarrahb25/errorHandlingVersionBaby#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
