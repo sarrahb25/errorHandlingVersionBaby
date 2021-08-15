@@ -19,6 +19,7 @@ mongoose.connect(
     useCreateIndex: true,
   }
 );
+mongoose.Promise = global.Promise;
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -52,7 +53,7 @@ app.use((error, req, res, next) => {
   res.status(error.status || 500);
   res.json({
     error: {
-      message: "error.message",
+      message: error.message,
     },
   });
 });

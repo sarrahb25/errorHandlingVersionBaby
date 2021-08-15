@@ -97,7 +97,13 @@ router.patch("/:productId", (req, res, next) => {
     .exec()
     .then((result) => {
       console.log(result);
-      res.status(200).json(result);
+      res.status(200).json({
+        message: "Product updated",
+        request: {
+          type: "GET",
+          url: "http://localhost:3000/products/" + id,
+        },
+      });
     })
     .catch((err) => {
       console.log;
@@ -107,10 +113,18 @@ router.patch("/:productId", (req, res, next) => {
 
 router.delete("/:productId", (req, res, next) => {
   const id = req.params.productId;
-  Product.remove({ _id: id })
+  Product.deleteOne({ _id: id })
     .exec()
     .then((result) => {
-      res.status(200).json(result);
+      res.status(200).json({
+        message:
+          "product deleted, you can now create other products using that API below",
+        request: {
+          type: "POST",
+          url: "http://localhost:3000/products",
+          body: { name: "String", price: "Number" },
+        },
+      });
     })
     .catch((err) => {
       console.log(err);
