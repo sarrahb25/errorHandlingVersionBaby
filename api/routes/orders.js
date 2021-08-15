@@ -9,6 +9,7 @@ const Product = require("../models/product");
 router.get("/", (req, res, next) => {
   Order.find()
     .select("product quantity _id")
+    .populate("product", "name")
     .exec()
     .then((docs) => {
       console.log(docs);
@@ -47,17 +48,16 @@ router.post("/", (req, res, next) => {
         quantity: req.body.quantity,
         product: req.body.productId,
       });
-      return order.save();
-    })
-    .then((result) => {
-      console.log(result);
-      res.status(201).json({
-        message: "Order saved",
-        createdOrder: {
-          id: result._id,
-          quantity: result.quantity,
-          product: result.productId,
-        },
+      return order.save().then((result) => {
+        console.log(result);
+        res.status(201).json({
+          message: "Order saved",
+          createdOrder: {
+            id: result._id,
+            quantity: result.quantity,
+            product: result.productId,
+          },
+        });
       });
     })
     .catch((err) => {
@@ -70,6 +70,7 @@ router.get("/:oerderId", (req, res, next) => {
   const orderId = req.params.oerderId;
   Order.findById(orderId)
     .select("_id quantity product")
+    .populate("product")
     .exec()
     .then((doc) => {
       if (doc) {
