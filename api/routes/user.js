@@ -45,11 +45,11 @@ router.post("/login", (req, res, next) => {
     .then((user) => {
       if (user.length < 1) {
         // 401 Unauthorised is safer than 404 not found since they can guess which exist and which doesn't
-        return res.status(401).json({ message: "Auth failed" });
+        return res.status(401).json({ message: "Auth failed 1" });
       }
       bcrypt.compare(req.body.password, user[0].password, (err, result) => {
         if (err) {
-          return res.status(401).json({ message: "Auth failed" });
+          return res.status(401).json({ message: "Auth failed 2" });
         }
         if (result) {
           const token = jwt.sign(
@@ -65,7 +65,7 @@ router.post("/login", (req, res, next) => {
           return res.status(200).json({ message: "Auth successful", token });
         }
         // of we don't make it into the conditions above means the password is incorrect and again we pass a 401 instead of 404
-        res.status(401).json({ message: "Auth failed" });
+        res.status(401).json({ message: "Auth failed3 " });
       });
     })
     .catch((err) => {
