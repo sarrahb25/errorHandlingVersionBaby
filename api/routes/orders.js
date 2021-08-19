@@ -6,130 +6,17 @@ const checkAuth = require("../middleware/check-auth");
 const Order = require("../models/order");
 const Product = require("../models/product");
 
-router.get("/", (req, res, next) => {
-  Order.find()
-    .select("product quantity _id")
-    .populate("product", "name")
-    .exec()
-    .then((docs) => {
-      console.log(docs);
-      res.status(200).json({
-        count: docs.length,
-        orders: docs.map((doc) => {
-          return {
-            _id: doc._id,
-            quantity: doc.quantity,
-            product: doc.product,
-            request: {
-              type: "GET",
-              url: "http://localhost:3000/orders/" + doc._id,
-            },
-          };
-        }),
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
-});
+const OrdersController = require("../controllers/orders");
+const order = require("../models/order");
 
-router.post("/", checkAuth, (req, res, next) => {
-  console.log(req.file);
-  Product.findById(req.body.productId)
-    .then((product) => {
-      if (!product) {
-        console.log("inside !product condition");
-        return res.status(404).json({
-          message: "product not found",
-        });
-      }
-      const order = new Order({
-        _id: new mongoose.Types.ObjectId(),
-        quantity: req.body.quantity,
-        product: req.body.productId,
-      });
-      return order.save().then((result) => {
-        console.log(result);
-        res.status(201).json({
-          message: "Order saved",
-          createdOrder: {
-            id: result._id,
-            quantity: result.quantity,
-            product: result.productId,
-          },
-        });
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
-});
+//Handle incoming get request to /orders
+router.get("/", checkAuth, OrdersController.orders_get_all);
 
-router.get("/:oerderId", (req, res, next) => {
-  const orderId = req.params.oerderId;
-  Order.findById(orderId)
-    .select("_id quantity product")
-    .populate("product")
-    .exec()
-    .then((doc) => {
-      if (doc) {
-        console.log(doc);
-        res.status(200).json({
-          order: doc,
-          request: {
-            type: "GET",
-            url: "http://localhost:3000/orders/" + doc._id,
-          },
-        });
-      } else {
-        res.status(404).json("no valid data with that order ID");
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
-});
+router.post("/", checkAuth, OrdersController.orders_post_one_order);
 
-router.patch("/:orderId", checkAuth, (req, res, next) => {
-  const id = req.params.orderId;
-  const updateOps = {};
-  for (const ops of req.body) {
-    updateOps[ops.propName] = ops.value;
-  }
-  Order.updateOne({ _id: id }, { $set: updateOps })
-    .exec()
-    .then((result) => {
-      res.status(200).json({
-        message: "Product updated",
-        request: {
-          type: "GET",
-          url: "http://localhost:3000/orders/" + id,
-        },
-      });
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err });
-    });
-});
+router.get("/:oerderId", OrdersController.get_order);
 
-router.delete("/:oerderId", checkAuth, (req, res, next) => {
-  Order.deleteOne({ _id: req.params.orderId })
-    .exec()
-    .then((result) => {
-      res.status(200).json({
-        message: "Order removed",
-        request: {
-          type: "POST",
-          url: "http://localhost:3000/orders/",
-        },
-        bode: {
-          quantity: "Number",
-          productId: "ID",
-        },
-      });
-    });
-});
+router.patch("/:orderId", checkAuth, OrdersController.update_order);
+
+router.delete("/:orderId", checkAuth, OrdersController.remove_order);
 module.exports = router;
