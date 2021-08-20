@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { ValidationError } = require("../../error/error");
+const CastError = require("mongoose/lib/error/cast");
 const Order = require("../models/order");
 const Product = require("../models/product");
 
@@ -31,6 +33,7 @@ exports.orders_get_all = (req, res, next) => {
 };
 
 exports.orders_post_one_order = (req, res, next) => {
+  // throw new Error("failed")
   console.log("here", req.body.productId);
   Product.findById(req.body.productId)
     .then((product) => {
@@ -58,9 +61,11 @@ exports.orders_post_one_order = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: err });
-    });
+      if (err instanceof CastError) {
+        throw new ValidationError(err.message);
+      }
+    })
+    .catch(next);
 };
 
 exports.get_order = (req, res, next) => {
