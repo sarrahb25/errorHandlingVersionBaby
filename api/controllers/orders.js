@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ValidationError } = require("../../error/error");
+const { ValidationError, NotFoundError } = require("../../error/error");
 const CastError = require("mongoose/lib/error/cast");
 const Order = require("../models/order");
 const Product = require("../models/product");
@@ -32,41 +32,50 @@ exports.orders_get_all = (req, res, next) => {
     });
 };
 
-exports.orders_post_one_order = (req, res, next) => {
+// this a decorator: it extends the promise returned by handler to catch any error returned
+// using the default error handler in express (which is "next")
+const withAsyncError = (handler) => (req, res, next) =>
+  handler(req, res, next).catch(next);
+
+exports.orders_post_one_order = withAsyncError(async (req, res, next) => {
   // throw new Error("failed")
   console.log("here", req.body.productId);
-  Product.findById(req.body.productId)
-    .then((product) => {
-      if (!product) {
-        console.log("inside product condition");
-        return res.status(404).json({
-          message: "product not found",
-        });
-      }
-      const order = new Order({
-        _id: new mongoose.Types.ObjectId(),
-        quantity: req.body.quantity,
-        product: req.body.productId,
-      });
-      return order.save().then((result) => {
-        console.log(result);
-        res.status(201).json({
-          message: "Order saved",
-          createdOrder: {
-            id: result._id,
-            quantity: result.quantity,
-            product: result.productId,
-          },
-        });
-      });
-    })
-    .catch((err) => {
-      if (err instanceof CastError) {
-        throw new ValidationError(err.message);
-      }
-    })
-    .catch(next);
-};
+  //   try {
+  const product = await Product.findById(req.body.productId);
+  if (!product) {
+    console.log("inside product condition");
+
+    throw new NotFoundError("Product not found");
+  }
+
+  const order = new Order({
+    _id: new mongoose.Types.ObjectId(),
+    quantity: req.body.quantity,
+    product: req.body.productId,
+  });
+
+  const result = await order.save();
+  console.log(result);
+
+  return res.status(201).json({
+    message: "Order saved",
+    createdOrder: {
+      id: result._id,
+      quantity: result.quantity,
+      product: result.productId,
+    },
+  });
+  //   } catch (err) {
+  //     if (err instanceof CastError) {
+  //       throw new ValidationError(err.message);
+  //     }
+  //     throw err;
+  //   }
+
+  //   if (err instanceof CastError) {
+  //     throw new ValidationError(err.message);
+  //   }
+});
 
 exports.get_order = (req, res, next) => {
   const orderId = req.params.oerderId;
