@@ -32,7 +32,7 @@ exports.orders_get_all = (req, res, next) => {
     });
 };
 
-// this a decorator: it extends the promise returned by handler to catch any error returned
+// this is a decorator: it extends the promise returned by handler to catch any error returned
 // using the default error handler in express (which is "next")
 const withAsyncError = (handler) => (req, res, next) =>
   handler(req, res, next).catch(next);
@@ -40,41 +40,37 @@ const withAsyncError = (handler) => (req, res, next) =>
 exports.orders_post_one_order = withAsyncError(async (req, res, next) => {
   // throw new Error("failed")
   console.log("here", req.body.productId);
-  //   try {
-  const product = await Product.findById(req.body.productId);
-  if (!product) {
-    console.log("inside product condition");
+  try {
+    const product = await Product.findById(req.body.productId);
+    if (!product) {
+      console.log("inside product condition");
 
-    throw new NotFoundError("Product not found");
+      throw new NotFoundError("Product not found");
+    }
+
+    const order = new Order({
+      _id: new mongoose.Types.ObjectId(),
+      quantity: req.body.quantity,
+      product: req.body.productId,
+    });
+
+    const result = await order.save();
+    console.log(result);
+
+    return res.status(201).json({
+      message: "Order saved",
+      createdOrder: {
+        id: result._id,
+        quantity: result.quantity,
+        product: result.productId,
+      },
+    });
+  } catch (err) {
+    if (err instanceof CastError) {
+      throw new ValidationError(err.message);
+    }
+    throw err;
   }
-
-  const order = new Order({
-    _id: new mongoose.Types.ObjectId(),
-    quantity: req.body.quantity,
-    product: req.body.productId,
-  });
-
-  const result = await order.save();
-  console.log(result);
-
-  return res.status(201).json({
-    message: "Order saved",
-    createdOrder: {
-      id: result._id,
-      quantity: result.quantity,
-      product: result.productId,
-    },
-  });
-  //   } catch (err) {
-  //     if (err instanceof CastError) {
-  //       throw new ValidationError(err.message);
-  //     }
-  //     throw err;
-  //   }
-
-  //   if (err instanceof CastError) {
-  //     throw new ValidationError(err.message);
-  //   }
 });
 
 exports.get_order = (req, res, next) => {
