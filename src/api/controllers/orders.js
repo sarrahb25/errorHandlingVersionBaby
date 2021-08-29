@@ -32,7 +32,7 @@ exports.orders_get_all = (req, res, next) => {
     });
 };
 
-// this is a decorator: it extends the promise returned by handler to catch any error returned
+// this is a HOF: it extends the promise returned by handler to catch any error returned
 // using the default error handler in express (which is "next")
 const withAsyncError = (handler) => (req, res, next) =>
   handler(req, res, next).catch(next);
@@ -72,6 +72,10 @@ exports.orders_post_one_order = withAsyncError(async (req, res, next) => {
     throw err;
   }
 });
+
+//approachs for data layer : doesn't specify logic that related to only one repository
+// user table (one entity) : user repo should operates with only user entity
+// look into more scalable app : data mapper approach: models = structure + repository = loigc  , samll apps: active record (pattern) + model describe a basic logic
 
 exports.get_order = (req, res, next) => {
   const orderId = req.params.oerderId;
@@ -138,3 +142,53 @@ exports.remove_order = (req, res, next) => {
       });
     });
 };
+
+// **************************** //
+// layered arc. quick look
+
+// this is a decorator: it extends the promise returned by handler to catch any error returned
+// using the default error handler in express (which is "next")
+// const withAsyncError = (handler) => (req, res, next) =>
+//   handler(req, res, next).catch(next);
+
+// exports.orders_post_one_order = withAsyncError(async (req, res, next) => {
+//   // throw new Error("failed")
+//   console.log("here", req.body.productId);
+//   try {
+//     const order = await businessLayer.createOrder(...)
+//     return res.status(201).json(order)
+//   } catch (err) {
+//     if (err instanceof ProductNotFoundError) {
+//       throw new NotFoundError(err.message);
+//     }
+//     if (err instanceof OrderAlreadyExists) {
+//       throw new ConflictError(err.message)
+//     }
+//     throw err;
+//   }
+// });
+
+// const product = await Product.findById(req.body.productId);
+//     if (!product) {
+//       console.log("inside product condition");
+
+//       throw new ProductNotFoundError("Product not found");
+//     }
+
+//     const order = new Order({
+//       _id: new mongoose.Types.ObjectId(),
+//       quantity: req.body.quantity,
+//       product: req.body.productId,
+//     });
+
+//     const result = await order.save();
+//     console.log(result);
+
+//     return res.status(201).json({
+//       message: "Order saved",
+//       createdOrder: {
+//         id: result._id,
+//         quantity: result.quantity,
+//         product: result.productId,
+//       },
+//     });

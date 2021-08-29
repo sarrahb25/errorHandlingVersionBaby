@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2019",
+    "paths": {
+      "src/*": ["src/*"]
+    },
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "noUncheckedIndexedAccess": true,
+    "strictNullChecks": true
+  },
+  "include": ["src/**/*", "typings/*"]
+}

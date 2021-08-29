@@ -1,4 +1,9 @@
 {
+  "watch": ["src", "config"],
+  "ext": ".js,.ts,.yaml",
+  "ignore": ["*.spec.ts", "**/__tests__/**"],
+  "exec": "ts-node --files src/server.js",
+  "delay": "1000",
   "env": {
     "MONGO_ALTAS_PW": "uWr.!Yn9a-D5Aq3",
     "JWT_KEY": "secret"
