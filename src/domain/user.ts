@@ -1,31 +1,37 @@
-import { CreateTracingOptions } from "trace_events";
+import bcrypt from "bcrypt";
 
 //We're using entities defined with classers and have certain behavior
 export class User {
   readonly id: string;
   readonly email: string;
-  readonly password: string;
+  readonly hashedPassword: string;
 
-  private constructor(id: string, email: string, password: string) {
+  private constructor(id: string, email: string, hashedPassword: string) {
     this.id = id;
     this.email = email;
-    this.password = password;
+    this.hashedPassword = hashedPassword;
+  }
+  // static method doesn't have a state, it's called on the class
+  static create(email: string, password: string): User {
+    // hash password with bcrypt
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    return new User("id", email, hashedPassword);
   }
 
-  static create(email: string, password: string): User {
-    return new User("id", email, password);
+  passwordMatches(password: string): boolean {
+    return bcrypt.compareSync(password, this.hashedPassword);
   }
 }
 
-//domain repository
+//domain repository : abstraction layer used to represent database/datasource
 export interface UserRepository {
-  add(user: User): Promise<void>;
+  add(user: User): Promise<void>; //upsert method: update or insert
   get(id: string): Promise<User | null>;
   delete(id: string): Promise<void>;
 }
 
 export interface UserQueryHandler {
-  getByEmail(email: string): Promise<User | null>;
+  getUserByEmail(email: string): Promise<User | null>;
 }
 
 //domain command
@@ -34,7 +40,14 @@ export interface CreateUser {
   password: string;
 }
 
-//perform the operation : command handler or application service
+export class UserAlreadyExistsError extends Error {
+  constructor(message?: string) {
+    super(message);
+  }
+}
+
+// perform the operation : command handler or application service: perform state change
+// component implementing one specific business operation:
 export class CreateUserHandler {
   readonly userQueryHandler: UserQueryHandler;
   readonly userRepository: UserRepository;
@@ -48,8 +61,8 @@ export class CreateUserHandler {
   }
 
   async handle(command: CreateUser): Promise<User> {
-    if (await this.userQueryHandler.getByEmail(command.email)) {
-      throw new Error("user exists with same email");
+    if (await this.userQueryHandler.getUserByEmail(command.email)) {
+      throw new UserAlreadyExistsError("");
     }
 
     const user = User.create(command.email, command.password);
