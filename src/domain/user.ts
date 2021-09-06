@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { Types } from "mongoose";
 
 //We're using entities defined with classers and have certain behavior
 export class User {
@@ -12,10 +13,10 @@ export class User {
     this.hashedPassword = hashedPassword;
   }
   // static method doesn't have a state, it's called on the class
-  static create(email: string, password: string): User {
+  static create(id: string, email: string, password: string): User {
     // hash password with bcrypt
     const hashedPassword = bcrypt.hashSync(password, 10);
-    return new User("id", email, hashedPassword);
+    return new User(id, email, hashedPassword);
   }
 
   passwordMatches(password: string): boolean {
@@ -65,7 +66,8 @@ export class CreateUserHandler {
       throw new UserAlreadyExistsError("");
     }
 
-    const user = User.create(command.email, command.password);
+    const id = new Types.ObjectId().toString();
+    const user = User.create(id, command.email, command.password);
     await this.userRepository.add(user);
 
     return user;

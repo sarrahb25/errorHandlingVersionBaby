@@ -11,7 +11,7 @@ describe("Create user command", () => {
     const userQueryHandler: UserQueryHandler = {
       getUserByEmail: async (email) => {
         expect(email).toEqual("my@email.com");
-        return User.create("my@email.com", "test");
+        return User.create("testUser", "my@email.com", "test");
       },
     };
 
