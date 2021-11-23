@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="2" failures="0" errors="0" time="3.709">
-  <testsuite name="Create user command" errors="0" failures="0" skipped="0" timestamp="2021-09-06T20:31:18" time="3.475" tests="2">
-    <testcase classname="Create user command fails when a user already exists with the same email" name="Create user command fails when a user already exists with the same email" time="0.145">
-    </testcase>
-    <testcase classname="Create user command succeeds when a user does not exist with specified email" name="Create user command succeeds when a user does not exist with specified email" time="0.14">
-    </testcase>
-  </testsuite>
-</testsuites>

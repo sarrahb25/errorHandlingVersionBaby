@@ -1,10 +1,5 @@
-import {
-  CreateUserHandler,
-  User,
-  UserAlreadyExistsError,
-  UserQueryHandler,
-  UserRepository,
-} from "./user";
+import { User, UserQueryHandler, UserRepository } from "../domain/user";
+import { CreateUserHandler, UserAlreadyExistsError } from "./createUser";
 
 describe("Create user command", () => {
   test("fails when a user already exists with the same email", async () => {
@@ -17,7 +12,7 @@ describe("Create user command", () => {
 
     const handler = new CreateUserHandler(
       userQueryHandler,
-      jest.genMockFromModule("./user")
+      jest.genMockFromModule("../domain/user")
     );
 
     await expect(

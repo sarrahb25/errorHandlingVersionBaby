@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import { Types } from "mongoose";
 
 //We're using entities defined with classers and have certain behavior
 export class User {
@@ -24,7 +23,8 @@ export class User {
   }
 }
 
-//domain repository : abstraction layer used to represent database/datasource
+//domain repository  (domaine service like the validators): abstraction layer used to represent database/datasource
+
 export interface UserRepository {
   add(user: User): Promise<void>; //upsert method: update or insert
   get(id: string): Promise<User | null>;
@@ -34,47 +34,3 @@ export interface UserRepository {
 export interface UserQueryHandler {
   getUserByEmail(email: string): Promise<User | null>;
 }
-
-//domain command
-export interface CreateUser {
-  email: string;
-  password: string;
-}
-
-export class UserAlreadyExistsError extends Error {
-  constructor(message?: string) {
-    super(message);
-  }
-}
-
-// perform the operation : command handler or application service: perform state change
-// component implementing one specific business operation:
-export class CreateUserHandler {
-  readonly userQueryHandler: UserQueryHandler;
-  readonly userRepository: UserRepository;
-
-  constructor(
-    userQueryHandler: UserQueryHandler,
-    userRepository: UserRepository
-  ) {
-    this.userQueryHandler = userQueryHandler;
-    this.userRepository = userRepository;
-  }
-
-  async handle(command: CreateUser): Promise<User> {
-    if (await this.userQueryHandler.getUserByEmail(command.email)) {
-      throw new UserAlreadyExistsError("");
-    }
-
-    const id = new Types.ObjectId().toString();
-    const user = User.create(id, command.email, command.password);
-    await this.userRepository.add(user);
-
-    return user;
-  }
-}
-
-// Entity presented with a class
-// define operations on the entity
-// anemic domain model : interface + function
-/// ******

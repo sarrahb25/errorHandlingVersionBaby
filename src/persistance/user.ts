@@ -24,7 +24,7 @@ const schema = new Schema<UserDocument>({
 // 3. Create a Model.
 const UserModel = model<UserDocument>("User", schema);
 // implement UserRepository interface
-class MongoUserDocument implements UserRepository {
+class MongoUserRepository implements UserRepository {
   async add(user: User): Promise<void> {
     await UserModel.findOneAndUpdate(
       { email: user.email },
