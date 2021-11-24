@@ -2,10 +2,14 @@
   "watch": ["src", "config"],
   "ext": ".js,.ts,.yaml",
   "ignore": ["*.spec.ts", "**/__tests__/**"],
-  "exec": "ts-node --files src/server.js",
+  "exec": "NODE_PATH=./src ts-node ./src/server.ts",
   "delay": "1000",
   "env": {
     "MONGO_ALTAS_PW": "uWr.!Yn9a-D5Aq3",
-    "JWT_KEY": "secret"
+    "MONGO_DSN": "mongodb://localhost:27017",
+    "MONGO_USERNAME": "root",
+    "MONGO_PASSWORD": "example",
+    "MONGO_DB_NAME": "app",
+    "JWT_KEY": "not-a-secret"
   }
 }

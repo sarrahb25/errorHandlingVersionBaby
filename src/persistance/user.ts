@@ -1,5 +1,5 @@
 import { Schema, model, connect, Types } from "mongoose";
-import { User, UserRepository } from "src/domain/user";
+import { User, UserQueryHandler, UserRepository } from "../domain/user";
 
 // 1. Create an interface representing a document in MongoDB.
 interface UserDocument {
@@ -23,8 +23,9 @@ const schema = new Schema<UserDocument>({
 
 // 3. Create a Model.
 const UserModel = model<UserDocument>("User", schema);
+
 // implement UserRepository interface
-class MongoUserRepository implements UserRepository {
+export class MongoUserRepository implements UserRepository {
   async add(user: User): Promise<void> {
     await UserModel.findOneAndUpdate(
       { email: user.email },
@@ -43,5 +44,19 @@ class MongoUserRepository implements UserRepository {
 
   async delete(id: string): Promise<void> {
     throw new Error("Method not implemented.");
+  }
+}
+
+export class MongoUserQueryHandler implements UserQueryHandler {
+  async getUserByEmail(email: string): Promise<User | null> {
+    const userDocument = await UserModel.findOne({ email: email }).exec();
+    if (!userDocument) {
+      return null;
+    }
+    return User.create(
+      userDocument._id,
+      userDocument.email,
+      userDocument.password
+    );
   }
 }
