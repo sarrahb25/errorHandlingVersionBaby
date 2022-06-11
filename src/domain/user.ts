@@ -24,7 +24,7 @@ export class User {
 }
 
 //domain repository  (domaine service like the validators): abstraction layer used to represent database/datasource
-
+//would be better to add getUserByEmail here as well
 export interface UserRepository {
   add(user: User): Promise<void>; //upsert method: update or insert
   get(id: string): Promise<User | null>;
@@ -34,3 +34,8 @@ export interface UserRepository {
 export interface UserQueryHandler {
   getUserByEmail(email: string): Promise<User | null>;
 }
+
+
+//domain describes business so probably repository doesn't live here?
+//DDD for domain part should be understood by even non-engineer. The domain description (models) 
+//need to be clear to PO as well 
